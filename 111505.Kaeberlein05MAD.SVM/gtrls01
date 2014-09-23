@@ -1,0 +1,106 @@
+#!/usr/bin/perl
+
+BEGIN { unshift(@INC,"/home/hqin/lib/perl/");   }
+
+#041404Wed Hong Qin
+ 
+use strict; use warnings; use Getopt::Long;
+use Util;  
+
+my $in_file_list = undef;	
+my $out_file     = undef;	
+my $na_symbol = undef;
+my $debug = 0;		
+
+if (! $ARGV[0]) { _help(); exit(1); }
+
+GetOptions ('i|in_file_list=s' => \$in_file_list,        # required
+            'o|out_file=s' => \$out_file,   		# optional
+	    'na|na_symbol=s' => \$na_symbol,   # default '', 
+            'd|debug=i' => \$debug);
+ 
+if ( ! $in_file_list )  { _help(); exit(1); }
+if ( ! $na_symbol ) { $na_symbol = 'NA' } # default is 'NA'
+if ( ! $out_file ) {
+  my $alias = get_shortened_name( $in_file_list );
+  $out_file = "table.frm.$alias.tab";
+}
+
+# key variables
+ my @out_lines = ();
+ my $current_num_of_files = 0;
+ my $max_row_num = 0;
+ # my $current_num_of_rows = 0; 
+ 
+ 
+# find out $max_row_num= 
+open ( FL, "<$in_file_list" );
+while ( my $file = <FL> ) {
+ chomp $file; 
+ open (IN, "<$file" ); my @lines=<IN>; close (IN);
+ if ( $max_row_num <= ( $#lines + 1) ) {
+    $max_row_num = $#lines + 1
+ }
+ if ($debug>2) { print "$file ..$max_row_num=$max_row_num ";
+   print "current rows".($#lines+1)."\n";
+ } 
+} 
+close(FL);
+ 
+if ($debug) { print "\$max_row_num=$max_row_num\n" };
+
+# generate output
+open ( FL, "<$in_file_list" );
+while ( my $file = <FL> ) {
+ open (IN, "<$file" ); my @current_lines=<IN>; close (IN);
+ my $current_row_num = $#current_lines + 1; 
+ 
+ unshift ( @current_lines, $file ); # add header
+ 
+ if ($debug) { print "processing $file ..current row num $current_row_num ... \n"} 
+# if ($debug >1) { print "\@current_lines=[@current_lines]\n"} 
+ 
+if ( $current_row_num < $max_row_num ) {
+	for ( my $i= 0; $i<= $current_row_num; $i++ ) {
+	  chomp $current_lines[$i];
+          $out_lines[$i] .= "$current_lines[$i]\t"; 
+	}  
+	for ( my $i= ($current_row_num + 1); $i<= $max_row_num; $i++ ) {
+          $out_lines[$i] .= "$na_symbol\t"; 
+	}  
+} else {
+	for ( my $i= 0; $i<= $max_row_num; $i++ ) {
+	  chomp $current_lines[$i];
+          $out_lines[$i] .= "$current_lines[$i]\t"; 
+	}  
+} 
+ 
+
+
+}#while loop
+close (FL);
+
+open (OUT, ">$out_file");
+foreach my $line (@out_lines) {
+# remove the last tab
+ $line =~ s/\t*$//g;
+ print OUT "$line\n";
+}
+close (OUT);
+
+#
+# end of main
+#
+
+#-----------------------------------------
+sub _help {
+  print "\nUsage:  perl $0 
+  
+  GetOptions ('i|in_file_list=s' => \$in_file_list,        # required
+            'o|out_file=s' => \$out_file,   # required
+            'd|debug=i' => \$debug);  
+  
+  ";
+}
+
+

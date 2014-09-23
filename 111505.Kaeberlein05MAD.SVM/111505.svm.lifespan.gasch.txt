@@ -1,0 +1,10 @@
+111505Tue svm
+
+Use Kaeberlein05MAD data, Gasch00MCB expression data. 
+After using PCA to decompose the Gasch data, I trained the Kaeberlein lifespan genes.
+Then run on the whole genome. 
+The results is disappointing. Not a single "increase" gene was predicted from the whole genome data. Although, a dozen more "decrease" genes are predicted. 
+
+After changing my criteria for "increase", "moderate", and "decrease", I got 26 "increase" genes from the whole genome. 
+
+Because the analysis is based on expression profiling, so, it may not be a suprise that some related genes are picked out, such as glucose repressor. 

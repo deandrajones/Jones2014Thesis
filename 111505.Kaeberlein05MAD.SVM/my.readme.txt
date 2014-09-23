@@ -1,0 +1,3 @@
+This SVM prediction is based on the 40 PCA components of Gasch expression data. 
+
+The prediction may be improved by non-expression data, such as lethality, fitness data, and interaction. 
